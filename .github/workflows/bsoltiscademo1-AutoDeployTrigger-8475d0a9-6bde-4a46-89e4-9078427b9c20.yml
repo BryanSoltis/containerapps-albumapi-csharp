@@ -1,0 +1,42 @@
+name: Trigger auto deployment for bsoltiscademo1
+
+# When this action will be executed
+on:
+  # Automatically trigger it when detected changes in repo
+  push:
+    branches: 
+      [ main ]
+    paths:
+    - '**'
+    - '.github/workflows/bsoltiscademo1-AutoDeployTrigger-8475d0a9-6bde-4a46-89e4-9078427b9c20.yml'
+
+  # Allow mannually trigger 
+  workflow_dispatch:
+      
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout to the branch
+        uses: actions/checkout@v2
+
+      - name: Azure Login
+        uses: azure/login@v1
+        with:
+          creds: ${{ secrets.BSOLTISCADEMO1_AZURE_CREDENTIALS }}
+
+      - name: Build and push container image to registry
+        uses: azure/container-apps-deploy-action@v1
+        with:
+          appSourcePath: ${{ github.workspace }} 
+          registryUrl: azurenamingtoolcr.azurecr.io
+          registryUsername: ${{ secrets.BSOLTISCADEMO1_REGISTRY_USERNAME }}
+          registryPassword: ${{ secrets.BSOLTISCADEMO1_REGISTRY_PASSWORD }}
+          containerAppName: bsoltiscademo1
+          resourceGroup: bsoltiscappdemorg
+          imageToBuild: azurenamingtoolcr.azurecr.io/bsoltiscademo1:${{ github.sha }}
+          
+
+     
+
